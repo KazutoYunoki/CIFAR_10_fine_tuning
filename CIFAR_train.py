@@ -9,19 +9,12 @@ import numpy as np
 import random
 from tqdm import tqdm
 
-#load_CIFARをロードする関数
-'''
-    Attribute
-    ---------
-    resize:
-    mean:
-    std:
-    batch:
-'''
+#CIFAR10をロードする関数
 def load_CIFAR(resize, mean, std, batch_size):
     train_dataset = datasets.CIFAR10(
         "./data",
         train = True,
+        #データオーギュメンテーション
         transform=transforms.Compose([
             transforms.RandomResizedCrop(resize, scale = (0.5, 1.0)),
             transforms.RandomHorizontalFlip(),
@@ -42,7 +35,6 @@ def load_CIFAR(resize, mean, std, batch_size):
         ]),
         download = True
     )
-    print(test_dataset)
 
     train_dataloader = torch.utils.data.DataLoader(
         train_dataset,
@@ -64,6 +56,7 @@ std = (0.229, 0.224, 0.225)
 batch_size = 32
 
 dataloaders_dict = load_CIFAR(resize = 224, mean = mean, std = std, batch_size = batch_size)
+
 #ラベルとデータサイズ表示
 '''
 batch_iterator = iter(dataloaders_dict['train'])
@@ -71,7 +64,6 @@ inputs, labels = next(batch_iterator)
 print(inputs.size())
 print(labels)
 '''
-
 
 #画像表示
 '''
@@ -82,16 +74,16 @@ for i in range(0, 5):
     plt.imshow(img)
     plt.show()
 '''
-
+#学習済みのVGG-16モデルのロード
 user_pretrained = True
 net = models.vgg16(pretrained=user_pretrained)
 
+#10クラス分類
 net.classifier[6] = nn.Linear(in_features = 4096, out_features = 10)
 print(net)
 
-
+#訓練モードに設定
 net.train()
-print('ネットワーク設定完了：訓練モードに設定')
 
 #損失関数
 criterion = nn.CrossEntropyLoss()
@@ -123,6 +115,7 @@ optimizer = optim.SGD(params = params_to_update, lr = 0.001, momentum = 0.9)
 #モデルを学習させる関数
 def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
 
+    #損失値と認識率を保存するリスト
     history = {
         'train_loss': [],
         'train_acc' :[],
@@ -162,6 +155,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 
+                #勾配の初期化
                 optimizer.zero_grad()
 
                 with torch.set_grad_enabled(phase == 'train'):
@@ -188,14 +182,6 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
 
-
-    print(history['train_loss'])
-    print('----------')
-    print(history['test_loss'])
-    print('-----------')
-    print(history['train_acc'])
-
-    
     plt.figure()
     plt.plot(range(1, num_epochs + 1, 1), history['train_loss'], label = 'train_loss')
     plt.plot(range(1, num_epochs + 1, 1), history['test_loss'], label = 'test_loss')
