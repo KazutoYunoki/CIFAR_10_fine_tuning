@@ -10,14 +10,6 @@ import random
 from tqdm import tqdm
 
 #load_CIFARをロードする関数
-'''
-    Attribute
-    ---------
-    resize:
-    mean:
-    std:
-    batch:
-'''
 def load_CIFAR(resize, mean, std, batch_size):
     train_dataset = datasets.CIFAR10(
         "./data",
@@ -87,8 +79,6 @@ user_pretrained = True
 net = models.vgg16(pretrained=user_pretrained)
 
 net.classifier[6] = nn.Linear(in_features = 4096, out_features = 10)
-print(net)
-
 
 net.train()
 print('ネットワーク設定完了：訓練モードに設定')
@@ -123,6 +113,7 @@ optimizer = optim.SGD(params = params_to_update, lr = 0.001, momentum = 0.9)
 #モデルを学習させる関数
 def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
 
+    #損失値と認識率を保存するリスト
     history = {
         'train_loss': [],
         'train_acc' :[],
@@ -131,7 +122,6 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
     }
 
     #GPU初期設定
-
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("使用デバイス: ", device)
 
@@ -188,14 +178,6 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
 
-
-    print(history['train_loss'])
-    print('----------')
-    print(history['test_loss'])
-    print('-----------')
-    print(history['train_acc'])
-
-    
     plt.figure()
     plt.plot(range(1, num_epochs + 1, 1), history['train_loss'], label = 'train_loss')
     plt.plot(range(1, num_epochs + 1, 1), history['test_loss'], label = 'test_loss')
@@ -210,6 +192,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
     plt.legend()
     plt.savefig('acc_change_param.png')
 
+#20回学習
 num_epochs = 20
 train_model(net, dataloaders_dict, criterion, optimizer, num_epochs = num_epochs)
 
