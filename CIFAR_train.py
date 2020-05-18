@@ -9,7 +9,6 @@ import numpy as np
 import random
 from tqdm import tqdm
 
-#CIFAR10をロードする関数
 def load_CIFAR(resize, mean, std, batch_size):
     train_dataset = datasets.CIFAR10(
         "./data",
@@ -80,9 +79,7 @@ net = models.vgg16(pretrained=user_pretrained)
 
 #10クラス分類
 net.classifier[6] = nn.Linear(in_features = 4096, out_features = 10)
-print(net)
 
-#訓練モードに設定
 net.train()
 
 #損失関数
@@ -124,7 +121,6 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
     }
 
     #GPU初期設定
-
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("使用デバイス: ", device)
 
@@ -196,6 +192,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
     plt.legend()
     plt.savefig('acc_change_param.png')
 
+#20回学習
 num_epochs = 20
 train_model(net, dataloaders_dict, criterion, optimizer, num_epochs = num_epochs)
 
